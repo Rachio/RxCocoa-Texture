@@ -49,9 +49,9 @@ class RepositoryViewController: ASDKViewController<ASTableNode> {
     func loadMoreRepo(since: Int?) {
         _ = RepoService.loadRepository(params: [.since(since)])
             .delay(.milliseconds(500), scheduler: MainScheduler.asyncInstance)
-            .subscribeOn(ConcurrentDispatchQueueScheduler(qos: .default))
+            .subscribe(on: ConcurrentDispatchQueueScheduler(qos: .default))
             .map { $0.map { RepositoryViewModel2(repository: $0) } }
-            .observeOn(MainScheduler.instance)
+            .observe(on: MainScheduler.instance)
             .subscribe(onSuccess: { [weak self] items in
                 guard let `self` = self else { return }
                 
@@ -71,7 +71,7 @@ class RepositoryViewController: ASDKViewController<ASTableNode> {
                                          with: .fade)
                     self.context.completeBatchFetching(true)
                 }
-            }, onError: { [weak self] error in
+            }, onFailure: { [weak self] error in
                 guard let `self` = self else { return }
                 self.context.completeBatchFetching(true)
         })
